@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Clibavahiclient",
+        "repositoryURL": "https://github.com/TaborKelly/Clibavahiclient.git",
+        "state": {
+          "branch": "master",
+          "revision": "49b2437553ed91d58c9ccd0e409860c9904787ea",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
