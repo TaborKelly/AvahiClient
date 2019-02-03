@@ -164,4 +164,31 @@ Abbrev table for offset: 0x00000000
 ...
 ```
 
-You can read the whole llvm-dwarfdump dump [here](./llvm-dwarfdump.txt), but it looks suspiciosly like it has the debug sysmbols we need? I haven't figured out how to get them imported into lldb.
+You can read the whole llvm-dwarfdump dump [here](./llvm-dwarfdump.txt), but it looks suspiciously like it has the debug sysmbols we need?
+
+Also, `dwarfdump`:
+```
+
+.debug_info
+
+COMPILE_UNIT<header overall offset = 0x00000000>:
+< 0><0x0000000b>  DW_TAG_compile_unit
+                    DW_AT_producer              clang version 6.0.0 (git@github.com:apple/swift-clang.git 78aa734eee0a481cb13743f74a4b66a340e207fa) (git@github.com:apple/swift-llvm.git 4ba03d9389a3a5a6afccb2d6b202b7b6fa745f77)
+                    DW_AT_language              DW_LANG_C99
+                    DW_AT_name                  Clibavahiclient
+                    DW_AT_stmt_list             0x00000000
+                    DW_AT_comp_dir              /work/AvahiClient
+                    DW_AT_GNU_pubnames          yes(1)
+                    DW_AT_GNU_dwo_id            0xf843335bbb2b9173
+
+LOCAL_SYMBOLS:
+< 1><0x00000026>    DW_TAG_module
+                      DW_AT_name                  Clibavahiclient
+                      <Unknown AT value 0x3e01>   "-D__swift__=40150"
+                      <Unknown AT value 0x3e00>   /work/AvahiClient/.build/checkouts/Clibavahiclient.git--4733535768090925471
+                      <Unknown AT value 0x3e02>   /
+```
+
+You can read the whole dwarfdump dump [here](./dwarfdump.txt)
+
+I haven't figured out how to get them imported into lldb.
