@@ -6,21 +6,27 @@ This exists mainly to demonstrate a bug in LLDB.
 
 ## Building
 ### On Ubuntu 18.04
-Assuming that you have Swift and `libavahi-client-dev` installed, all the normal SPM `swift build`/ `swift test` should just work.
+Assuming that you have [Swift installed](https://swift.org/download/) this should work:
+1. `sudo apt-get install libavahi-client-dev`
+1. `swift build`
+1. `swift test`
 
-## Debug
-### Prerequisite: update ~/.lldbinit
-Add this line to your `~/.lldbinit`:
-```
-log enable f /tmp/lldbtypes-log.txt lldb types
-```
-
-### Run the debugger
+## Run the debugger
 Make sure to run with `LLDB_SWIFT_DUMP_DIAGS=1` enabled. Start the debugger and set a breakpoint. Note the error to find `Clibavahiclient`.
 ```
-LLDB_SWIFT_DUMP_DIAGS=1 lldb ./.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest
+$ LLDB_SWIFT_DUMP_DIAGS=1 lldb ./.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest
+(lldb) target create "./.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest"
+Current executable set to './.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest' (x86_64).
+(lldb) breakpoint set -f AvahiClientTests.swift -l 12
 <unknown>:0: error: missing required module 'Clibavahiclient'
 Breakpoint 1: where = AvahiClientPackageTests.xctest`AvahiClientTests.AvahiClientTests.testNewAvahiClient() -> () + 135 at AvahiClientTests.swift:12, address = 0x0000000000004a07
+
+```
+
+You can see that lldb is telling the truth. It does not know about Clibavahiclient:
+```
+(lldb) target modules list
+[  0] E21ECC95-0000-0000-0000-000000000000                    ./.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest
 ```
 
 Try to run and print anyway:
@@ -49,12 +55,6 @@ failed to get module 'AvahiClientTests' from AST context:
 error: missing required module 'Clibavahiclient'
 ```
 
-You can see that lldb is telling the truth. It does not know about Clibavahiclient:
-```
-(lldb) target modules list
-[  0] E21ECC95-0000-0000-0000-000000000000                    ./.build/x86_64-unknown-linux/debug/AvahiClientPackageTests.xctest
-```
-
 ## Further digging
 If we go poking around, we do see some stuff under `.build/` with `Clibavahiclient` in the name:
 ```
@@ -64,6 +64,7 @@ $ find . -name Clibavahiclient*
 ./.build/repositories/Clibavahiclient.git--4733535768090925471
 ```
 
+### readelf
 `Clibavahiclient-2J8WBHG3Q43SC.pcm` sounds promising, let's try a `readelf`:
 ```
 ELF Header:
@@ -128,8 +129,10 @@ Section Headers:
        00000000000000a8  0000000000000018           1     7     8
 ...
 ```
-You can read the whole readelf dump [here](./readelf.txt), but it does look like an ELF binary with some debug information in it. Let's try an `llvm-dwarfdump`:
+You can read the whole readelf dump [here](./readelf.txt), but it does look like an ELF binary with some debug information in it.
 
+### llvm-dwarfdump
+Let's try an `llvm-dwarfdump`:
 ```
 ./.build/x86_64-unknown-linux/debug/ModuleCache/33J8DIMD7H8ZB/Clibavahiclient-2J8WBHG3Q43SC.pcm:	file format ELF64-x86-64
 
@@ -166,6 +169,7 @@ Abbrev table for offset: 0x00000000
 
 You can read the whole llvm-dwarfdump dump [here](./llvm-dwarfdump.txt), but it looks suspiciously like it has the debug sysmbols we need?
 
+### dwarfdump
 Also, `dwarfdump`:
 ```
 
